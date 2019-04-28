@@ -44,16 +44,16 @@ class ClientServerTestCase(unittest.TestCase):
 
         changes = fold(self.db, fold_fun, [])
 
-        self.assert_(len(changes) == 1)
+        self.assertTrue(len(changes) == 1)
         change = changes[0]
-        self.assert_(change["id"] == doc['_id'])
+        self.assertTrue(change["id"] == doc['_id'])
 
 
     def test_lonpoll(self):
         def test_change():
             with ChangesStream(self.db, feed="longpoll") as stream:
                 for change in stream:
-                    self.assert_(change["seq"] == 1)
+                    self.assertTrue(change["seq"] == 1)
 
         t = threading.Thread(target=test_change)
         t.daemon = True
@@ -81,11 +81,11 @@ class ClientServerTestCase(unittest.TestCase):
 
         self.db.ensure_full_commit()
         time.sleep(0.3)
-        self.assert_(len(lines) == 5)
-        self.assert_(lines[4]["id"] == "test4")
+        self.assertTrue(len(lines) == 5)
+        self.assertTrue(lines[4]["id"] == "test4")
         doc = {"_id": "test5"}
         self.db.save_doc(doc)
         time.sleep(0.3)
-        self.assert_(len(lines) == 6)
-        self.assert_(lines[5]["id"] == "test5")
+        self.assertTrue(len(lines) == 6)
+        self.assertTrue(lines[5]["id"] == "test5")
 

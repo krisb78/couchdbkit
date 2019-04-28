@@ -45,54 +45,54 @@ class LoaderTestCase(unittest.TestCase):
     def testGetDoc(self):
         l = FileSystemDocsLoader(self.tempdir)
         design_doc = l.get_docs()[0]
-        self.assert_(isinstance(design_doc, dict))
-        self.assert_('_id' in design_doc)
-        self.assert_(design_doc['_id'] == "_design/couchdbkit-test")
-        self.assert_('lib' in design_doc)
-        self.assert_('helpers' in design_doc['lib'])
-        self.assert_('template' in design_doc['lib']['helpers'])
+        self.assertTrue(isinstance(design_doc, dict))
+        self.assertTrue('_id' in design_doc)
+        self.assertTrue(design_doc['_id'] == "_design/couchdbkit-test")
+        self.assertTrue('lib' in design_doc)
+        self.assertTrue('helpers' in design_doc['lib'])
+        self.assertTrue('template' in design_doc['lib']['helpers'])
         
     def testGetDocView(self):
         l = FileSystemDocsLoader(self.tempdir)
         design_doc = l.get_docs()[0]
-        self.assert_('views' in design_doc)
-        self.assert_('example' in design_doc['views'])
-        self.assert_('map' in design_doc['views']['example'])
-        self.assert_('emit' in design_doc['views']['example']['map'])
+        self.assertTrue('views' in design_doc)
+        self.assertTrue('example' in design_doc['views'])
+        self.assertTrue('map' in design_doc['views']['example'])
+        self.assertTrue('emit' in design_doc['views']['example']['map'])
         
     def testGetDocCouchApp(self):
         l = FileSystemDocsLoader(self.tempdir)
         design_doc = l.get_docs()[0]
-        self.assert_('couchapp' in design_doc)
+        self.assertTrue('couchapp' in design_doc)
         
     def testGetDocManifest(self):
         l = FileSystemDocsLoader(self.tempdir)
         design_doc = l.get_docs()[0]
-        self.assert_('manifest' in design_doc['couchapp'])
-        self.assert_('lib/helpers/template.js' in design_doc['couchapp']['manifest'])
-        self.assert_('foo/' in design_doc['couchapp']['manifest'])
-        self.assert_(len(design_doc['couchapp']['manifest']) == 16)
+        self.assertTrue('manifest' in design_doc['couchapp'])
+        self.assertTrue('lib/helpers/template.js' in design_doc['couchapp']['manifest'])
+        self.assertTrue('foo/' in design_doc['couchapp']['manifest'])
+        self.assertTrue(len(design_doc['couchapp']['manifest']) == 16)
         
         
     def testGetDocAttachments(self):
         l = FileSystemDocsLoader(self.tempdir)
         design_doc = l.get_docs()[0]
-        self.assert_('_attachments' in design_doc)
-        self.assert_('index.html' in design_doc['_attachments'])
-        self.assert_('style/main.css' in design_doc['_attachments'])
+        self.assertTrue('_attachments' in design_doc)
+        self.assertTrue('index.html' in design_doc['_attachments'])
+        self.assertTrue('style/main.css' in design_doc['_attachments'])
         
         content = design_doc['_attachments']['style/main.css']
-        self.assert_(base64.b64decode(content['data']) == "/* add styles here */")
+        self.assertTrue(base64.b64decode(content['data']) == "/* add styles here */")
         
     def testGetDocSignatures(self):
         l = FileSystemDocsLoader(self.tempdir)
         design_doc = l.get_docs()[0]
-        self.assert_('signatures' in design_doc['couchapp'])
-        self.assert_(len(design_doc['couchapp']['signatures']) == 2)
-        self.assert_('index.html' in design_doc['couchapp']['signatures'])
+        self.assertTrue('signatures' in design_doc['couchapp'])
+        self.assertTrue(len(design_doc['couchapp']['signatures']) == 2)
+        self.assertTrue('index.html' in design_doc['couchapp']['signatures'])
         signature =  design_doc['couchapp']['signatures']['index.html']
         fsignature = sign_file(os.path.join(self.app_dir, '_attachments/index.html'))
-        self.assert_(signature==fsignature)
+        self.assertTrue(signature==fsignature)
         
     def _sync(self, atomic=True):
         l = FileSystemDocsLoader(self.tempdir)
@@ -103,40 +103,40 @@ class LoaderTestCase(unittest.TestCase):
             design_doc = self.db['_design/couchdbkit-test']
         except ResourceNotFound:
             pass
-        self.assert_(design_doc is not None)
+        self.assertTrue(design_doc is not None)
         
 
         # should create view
-        self.assert_('function' in design_doc['views']['example']['map'])
+        self.assertTrue('function' in design_doc['views']['example']['map'])
         # should not create empty views
         self.assertFalse('empty' in design_doc['views'])
         self.assertFalse('wrong' in design_doc['views'])
         
         # should use macros
-        self.assert_('stddev' in design_doc['views']['example']['map'])
-        self.assert_('ejohn.org' in design_doc['shows']['example-show'])
+        self.assertTrue('stddev' in design_doc['views']['example']['map'])
+        self.assertTrue('ejohn.org' in design_doc['shows']['example-show'])
         
         # should have attachments
-        self.assert_('_attachments' in design_doc)
+        self.assertTrue('_attachments' in design_doc)
         
         # should create index
-        self.assert_(design_doc['_attachments']['index.html']['content_type'] == 'text/html')
+        self.assertTrue(design_doc['_attachments']['index.html']['content_type'] == 'text/html')
         
         # should create manifest
-        self.assert_('foo/' in design_doc['couchapp']['manifest'])
+        self.assertTrue('foo/' in design_doc['couchapp']['manifest'])
         
         # should push and macro the doc shows
-        self.assert_('Generated CouchApp Form Template' in design_doc['shows']['example-show'])
+        self.assertTrue('Generated CouchApp Form Template' in design_doc['shows']['example-show'])
         
         # should push and macro the view lists
-        self.assert_('Test XML Feed' in design_doc['lists']['feed'])
+        self.assertTrue('Test XML Feed' in design_doc['lists']['feed'])
         
         # should allow deeper includes
         self.assertFalse('"helpers"' in design_doc['shows']['example-show'])
         
         # deep require macros
         self.assertFalse('"template"' in design_doc['shows']['example-show'])
-        self.assert_('Resig' in design_doc['shows']['example-show'])
+        self.assertTrue('Resig' in design_doc['shows']['example-show'])
         
     def testSync(self):
         self._sync()

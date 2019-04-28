@@ -1,1 +1,1 @@
-restkit>=4.2.2
+-e git+https://github.com/krisb78/restkit.git@7ec926b3de97a589a22d11799f68b51fa1913362#egg=restkit

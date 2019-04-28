@@ -36,12 +36,12 @@ if support_setproperty:
     __all__ += ['SetProperty', 'LazySet']
 
 ALLOWED_PROPERTY_TYPES = set([
-    basestring,
     str,
-    unicode,
+    str,
+    str,
     bool,
     int,
-    long,
+    int,
     float,
     datetime.datetime,
     datetime.date,
@@ -130,14 +130,14 @@ class Property(object):
         else:
             if self.choices and value is not None:
                 if isinstance(self.choices, list):      choice_list = self.choices
-                if isinstance(self.choices, dict):      choice_list = self.choices.keys()
+                if isinstance(self.choices, dict):      choice_list = list(self.choices.keys())
                 if isinstance(self.choices, tuple):     choice_list = [key for (key, name) in self.choices]
 
                 if value not in choice_list:
                     raise BadValueError('Property %s is %r; must be one of %r' % (
                         self.name, value, choice_list))
         if self.validators:
-            if isinstance(self.validators, (list, tuple,)):
+            if isinstance(self.validators, (list, tuple)):
                 for validator in self.validators:
                     if callable(validator):
                         validator(value)
@@ -161,7 +161,7 @@ class Property(object):
 
     def to_python(self, value):
         """ convert to python type """
-        return unicode(value)
+        return str(value)
 
     def to_json(self, value):
         """ convert to json, Converted value is saved in couchdb. """
@@ -175,7 +175,7 @@ class StringProperty(Property):
     *Value type*: unicode
     """
 
-    to_python = unicode
+    to_python = str
 
     def validate(self, value, required=True):
         value = super(StringProperty, self).validate(value,
@@ -184,12 +184,12 @@ class StringProperty(Property):
         if value is None:
             return value
 
-        if not isinstance(value, basestring):
+        if not isinstance(value, str):
             raise BadValueError(
                 'Property %s must be unicode or str instance, not a %s' % (self.name, type(value).__name__))
         return value
 
-    data_type = unicode
+    data_type = str
 
 class IntegerProperty(Property):
     """ Integer property. map to int
@@ -208,7 +208,7 @@ class IntegerProperty(Property):
         if value is None:
             return value
 
-        if value is not None and not isinstance(value, (int, long,)):
+        if value is not None and not isinstance(value, int):
             raise BadValueError(
                 'Property %s must be %s or long instance, not a %s'
                 % (self.name, type(self.data_type).__name__,
@@ -279,7 +279,7 @@ class DecimalProperty(Property):
         return decimal.Decimal(value)
 
     def to_json(self, value):
-        return unicode(value)
+        return str(value)
 
 class DateTimeProperty(Property):
     """DateTime property. It convert iso3339 string
@@ -312,12 +312,12 @@ class DateTimeProperty(Property):
         return Property.default_value(self)
 
     def to_python(self, value):
-        if isinstance(value, basestring):
+        if isinstance(value, str):
             try:
                 value = value.split('.', 1)[0] # strip out microseconds
                 value = value[0:19] # remove timezone
                 value = datetime.datetime.strptime(value, '%Y-%m-%dT%H:%M:%S')
-            except ValueError, e:
+            except ValueError as e:
                 raise ValueError('Invalid ISO date/time %r [%s]' %
                         (value, str(e)))
         return value
@@ -349,10 +349,10 @@ class DateProperty(DateTimeProperty):
         return datetime.datetime.now().date()
 
     def to_python(self, value):
-        if isinstance(value, basestring):
+        if isinstance(value, str):
             try:
                 value = datetime.date(*time.strptime(value, '%Y-%m-%d')[:3])
-            except ValueError, e:
+            except ValueError as e:
                 raise ValueError('Invalid ISO date %r [%s]' % (value,
                     str(e)))
         return value
@@ -376,11 +376,11 @@ class TimeProperty(DateTimeProperty):
         return datetime.datetime.now().time()
 
     def to_python(self, value):
-        if isinstance(value, basestring):
+        if isinstance(value, str):
             try:
                 value = value.split('.', 1)[0] # strip out microseconds
                 value = datetime.time(*time.strptime(value, '%H:%M:%S')[3:6])
-            except ValueError, e:
+            except ValueError as e:
                 raise ValueError('Invalid ISO time %r [%s]' % (value,
                     str(e)))
         return value
@@ -455,15 +455,15 @@ class DictProperty(Property):
 class StringDictProperty(DictProperty):
 
     def to_python(self, value):
-        return LazyDict(value, item_type=basestring)
+        return LazyDict(value, item_type=str)
 
     def validate_dict_contents(self, value):
         try:
-            value = validate_dict_content(value, basestring)
+            value = validate_dict_content(value, str)
         except BadValueError:
             raise BadValueError(
                 'Items of %s dict must all be in %s' %
-                    (self.name, basestring))
+                    (self.name, str))
         return value
 
 
@@ -541,7 +541,7 @@ class StringListProperty(ListProperty):
     def __init__(self, verbose_name=None, default=None,
             required=False, **kwds):
         super(StringListProperty, self).__init__(verbose_name=verbose_name,
-            default=default, required=required, item_type=basestring, **kwds)
+            default=default, required=required, item_type=str, **kwds)
 
 
 
@@ -567,11 +567,11 @@ class LazyDict(dict):
         if init_vals is None:
             self._wrap()
         else:
-            for key, value in init_vals.items():
+            for key, value in list(init_vals.items()):
                 self[key] = value
 
     def _wrap(self):
-        for key, json_value in self.doc.items():
+        for key, json_value in list(self.doc.items()):
             if isinstance(json_value, dict):
                 value = LazyDict(json_value, item_type=self.item_type)
             elif isinstance(json_value, list):
@@ -611,7 +611,7 @@ class LazyDict(dict):
         return default
 
     def update(self, value):
-        for k, v in value.items():
+        for k, v in list(value.items()):
             self[k] = v
 
     def popitem(self, value):
@@ -830,7 +830,7 @@ if support_setproperty:
         def _map_named_operation(opname):
             fn = getattr(MutableSet, opname)
             if hasattr(fn, 'im_func'):
-                fn = fn.im_func
+                fn = fn.__func__
             def method(self, other, fn=fn):
                 if not isinstance(other, MutableSet):
                     other = self._from_iterable(other)
@@ -950,10 +950,10 @@ MAP_TYPES_PROPERTIES = {
         datetime.date: DateProperty,
         datetime.time: TimeProperty,
         str: StringProperty,
-        unicode: StringProperty,
+        str: StringProperty,
         bool: BooleanProperty,
         int: IntegerProperty,
-        long: LongProperty,
+        int: LongProperty,
         float: FloatProperty,
         list: ListProperty,
         dict: DictProperty
@@ -987,7 +987,7 @@ def validate_list_content(value, item_type=None):
 def validate_dict_content(value, item_type=None):
     """ validate type of values in a dict """
     return dict([(k, validate_content(v,
-                item_type=item_type)) for k, v in value.iteritems()])
+                item_type=item_type)) for k, v in value.items()])
 
 def validate_set_content(value, item_type=None):
     """ validate type of values in a set """
@@ -1010,7 +1010,7 @@ def validate_content(value, item_type=None):
 
 def dict_to_json(value, item_type=None):
     """ convert a dict to json """
-    return dict([(k, value_to_json(v, item_type=item_type)) for k, v in value.iteritems()])
+    return dict([(k, value_to_json(v, item_type=item_type)) for k, v in value.items()])
 
 def list_to_json(value, item_type=None):
     """ convert a list to json """
@@ -1028,7 +1028,7 @@ def value_to_json(value, item_type=None):
     elif isinstance(value, datetime.time) and is_type_ok(item_type, datetime.time):
         value = value.replace(microsecond=0).isoformat()
     elif isinstance(value, decimal.Decimal) and is_type_ok(item_type, decimal.Decimal):
-        value = unicode(value)
+        value = str(value)
     elif isinstance(value, (list, MutableSet)):
         value = list_to_json(value, item_type)
     elif isinstance(value, dict):
@@ -1044,7 +1044,7 @@ def value_to_python(value, item_type=None):
     have been put in json via `value_to_json` .
     """
     data_type = None
-    if isinstance(value, basestring):
+    if isinstance(value, str):
         if re_date.match(value) and is_type_ok(item_type, datetime.date):
             data_type = datetime.date
         elif re_time.match(value) and is_type_ok(item_type, datetime.time):
@@ -1072,4 +1072,4 @@ def list_to_python(value, item_type=None):
 
 def dict_to_python(value, item_type=None):
     """ convert a json object values to python dict """
-    return dict([(k, value_to_python(v, item_type=item_type)) for k, v in value.iteritems()])
+    return dict([(k, value_to_python(v, item_type=item_type)) for k, v in value.items()])

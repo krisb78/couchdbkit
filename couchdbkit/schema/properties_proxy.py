@@ -312,7 +312,7 @@ class SchemaDictProperty(Property):
         return value
 
     def validate_dict_schema(self, value, required=True):
-        for v in value.values():
+        for v in list(value.values()):
              v.validate(required=required)
         return value
 
@@ -323,7 +323,7 @@ class SchemaDictProperty(Property):
         return LazySchemaDict(value, self._schema, self._use_instance)
 
     def to_json(self, value):
-        return dict([(k, svalue_to_json(v, self._schema, self._use_instance)) for k, v in value.items()])
+        return dict([(k, svalue_to_json(v, self._schema, self._use_instance)) for k, v in list(value.items())])
 
 
 class LazySchemaDict(dict):
@@ -345,7 +345,7 @@ class LazySchemaDict(dict):
                 self[k] = self._wrap(v)
 
     def _wrap(self):
-        for k, v in self.doc.items():
+        for k, v in list(self.doc.items()):
             if not self.use_instance:
                 schema = self.schema()
             else:

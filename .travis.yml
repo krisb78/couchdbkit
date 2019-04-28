@@ -4,11 +4,11 @@ services:
     - couchdb
 
 python:
-    - 2.6
-    - 2.7
+    - 3.6
 
-install: 
-    - pip install -r requirements_dev.txt --use-mirrors
+install:
+    - pip install -r requirements_dev.txt
     - python setup.py install
+    - pip install -e git+https://github.com/krisb78/restkit.git@7ec926b3de97a589a22d11799f68b51fa1913362#egg=restkit
 
 script: python setup.py test

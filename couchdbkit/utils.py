@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -
 #
-# This file is part of couchdbkit released under the MIT license. 
+# This file is part of couchdbkit released under the MIT license.
 # See the NOTICE for more information.
 
 
@@ -8,7 +8,7 @@
 Mostly utility functions couchdbkit uses internally that don't
 really belong anywhere else in the modules.
 """
-from __future__ import with_statement
+from __future__ import print_function
 
 import codecs
 import string
@@ -16,7 +16,7 @@ from hashlib import md5
 import os
 import re
 import sys
-import urllib
+import urllib.request, urllib.parse, urllib.error
 
 
 try:
@@ -60,7 +60,7 @@ if not hasattr(os.path, 'relpath'):
                     index = len(p)
                 return p[:index], p[index:]
             return '', p
-            
+
         def relpath(path, start=os.path.curdir):
             """Return a relative version of a path"""
 
@@ -123,19 +123,19 @@ def validate_dbname(name):
     """ validate dbname """
     if name in SPECIAL_DBS:
         return True
-    elif not VALID_DB_NAME.match(urllib.unquote(name)):
+    elif not VALID_DB_NAME.match(urllib.parse.unquote(name)):
         raise ValueError("Invalid db name: '%s'" % name)
     return True
 
 def to_bytestring(s):
     """ convert to bytestring an unicode """
-    if not isinstance(s, basestring):
+    if not isinstance(s, str):
         return s
-    if isinstance(s, unicode):
+    if isinstance(s, str):
         return s.encode('utf-8')
     else:
         return s
-    
+
 def read_file(fname, utf8=True, force_read=False):
     """ read file content"""
     if utf8:
@@ -154,9 +154,9 @@ def read_file(fname, utf8=True, force_read=False):
 
 def sign_file(file_path):
     """ return md5 hash from file content
-    
+
     :attr file_path: string, path of file
-    
+
     :return: string, md5 hexdigest
     """
     if os.path.isfile(file_path):
@@ -166,7 +166,7 @@ def sign_file(file_path):
 
 def write_content(fname, content):
     """ write content in a file
-    
+
     :attr fname: string,filename
     :attr content: string
     """
@@ -176,26 +176,26 @@ def write_content(fname, content):
 
 def write_json(filename, content):
     """ serialize content in json and save it
-    
+
     :attr filename: string
     :attr content: string
-    
+
     """
     write_content(filename, json.dumps(content))
 
 def read_json(filename, use_environment=False):
     """ read a json file and deserialize
-    
+
     :attr filename: string
     :attr use_environment: boolean, default is False. If
     True, replace environment variable by their value in file
     content
-    
+
     :return: dict or list
     """
     try:
         data = read_file(filename, force_read=True)
-    except IOError, e:
+    except IOError as e:
         if e[0] == 2:
             return {}
         raise
@@ -206,7 +206,7 @@ def read_json(filename, use_environment=False):
     try:
         data = json.loads(data)
     except ValueError:
-        print >>sys.stderr, "Json is invalid, can't load %s" % filename
+        print("Json is invalid, can't load {}".format(filename), file=sys.stderr)
         raise
     return data
 

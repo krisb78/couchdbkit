@@ -4,7 +4,7 @@ from django.forms.widgets import HiddenInput
 from django.shortcuts import render_to_response
 from django.template import RequestContext
 
-from models import Post, Comment
+from .models import Post, Comment
 
 
 class PostForm(DocumentForm):

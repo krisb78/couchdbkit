@@ -55,7 +55,7 @@ class CouchdbkitHandler(object):
             )
 
         # create databases sessions
-        for app_name, app_setting in databases.iteritems():
+        for app_name, app_setting in databases.items():
             uri = app_setting['URL']
 
             # Do not send credentials when they are both None as admin party will give a 401
@@ -90,9 +90,9 @@ class CouchdbkitHandler(object):
         design docs to reduce blocking time of view updates """
         app_name = app.__name__.rsplit('.', 1)[0]
         app_labels = set()
-        schema_list = self.app_schema.values()
+        schema_list = list(self.app_schema.values())
         for schema_dict in schema_list:
-            for schema in schema_dict.values():
+            for schema in list(schema_dict.values()):
                 app_module = schema.__module__.rsplit(".", 1)[0]
                 if app_module == app_name and not schema._meta.app_label in app_labels:
                     app_labels.add(schema._meta.app_label)
@@ -100,14 +100,14 @@ class CouchdbkitHandler(object):
             if not app_label in self._databases:
                 continue
             if verbosity >=1:
-                print "sync `%s` in CouchDB" % app_name
+                print("sync `%s` in CouchDB" % app_name)
             db = self.get_db(app_label)
 
             app_path = os.path.abspath(os.path.join(sys.modules[app.__name__].__file__, ".."))
             design_path = "%s/%s" % (app_path, "_design")
             if not os.path.isdir(design_path):
                 if settings.DEBUG:
-                    print >>sys.stderr, "%s don't exists, no ddoc synchronized" % design_path
+                    print("%s don't exists, no ddoc synchronized" % design_path, file=sys.stderr)
                 return
 
             if temp:
@@ -122,10 +122,10 @@ class CouchdbkitHandler(object):
 
             if temp:
                 ddoc = db[docid]
-                view_names = ddoc.get('views', {}).keys()
+                view_names = list(ddoc.get('views', {}).keys())
                 if len(view_names) > 0:
                     if verbosity >= 1:
-                        print 'Triggering view rebuild'
+                        print('Triggering view rebuild')
 
                     view = '%s/%s' % (design_name, view_names[0])
                     list(db.view(view, limit=0))
@@ -138,9 +138,9 @@ class CouchdbkitHandler(object):
 
         app_name = app.__name__.rsplit('.', 1)[0]
         app_labels = set()
-        schema_list = self.app_schema.values()
+        schema_list = list(self.app_schema.values())
         for schema_dict in schema_list:
-            for schema in schema_dict.values():
+            for schema in list(schema_dict.values()):
                 app_module = schema.__module__.rsplit(".", 1)[0]
                 if app_module == app_name and not schema._meta.app_label in app_labels:
                     app_labels.add(schema._meta.app_label)
@@ -148,7 +148,7 @@ class CouchdbkitHandler(object):
             if not app_label in self._databases:
                 continue
             if verbosity >=1:
-                print "Copy prepared design docs for `%s`" % app_name
+                print("Copy prepared design docs for `%s`" % app_name)
             db = self.get_db(app_label)
 
             tmp_name = '%s-%s' % (app_label, temp)
@@ -163,7 +163,7 @@ class CouchdbkitHandler(object):
                     del db[from_id]
 
             except ResourceNotFound:
-                print '%s not found.' % (from_id, )
+                print('%s not found.' % (from_id, ))
                 return
 
 

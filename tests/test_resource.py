@@ -31,21 +31,21 @@ class ServerTestCase(unittest.TestCase):
 
     def testGetInfo(self):
         info = self.couchdb.get().json_body
-        self.assert_(info.has_key('version'))
+        self.assertTrue('version' in info)
         
     def testCreateDb(self):
         res = self.couchdb.put('/couchdkbit_test').json_body
-        self.assert_(res['ok'] == True)
+        self.assertTrue(res['ok'] == True)
         all_dbs = self.couchdb.get('/_all_dbs').json_body
-        self.assert_('couchdkbit_test' in all_dbs)
+        self.assertTrue('couchdkbit_test' in all_dbs)
         self.couchdb.delete('/couchdkbit_test')
 
     def testCreateEmptyDoc(self):
         res = self.couchdb.put('/couchdkbit_test/').json_body
-        self.assert_(res['ok'] == True)
+        self.assertTrue(res['ok'] == True)
         res = self.couchdb.post('/couchdkbit_test/', payload={}).json_body
         self.couchdb.delete('/couchdkbit_test')
-        self.assert_(len(res) > 0)
+        self.assertTrue(len(res) > 0)
 
     def testRequestFailed(self):
         bad = CouchdbResource('http://localhost:10000')

@@ -31,30 +31,30 @@ class ClientServerTestCase(unittest.TestCase):
 
     def testGetInfo(self):
         info = self.Server.info()
-        self.assert_(info.has_key('version'))
+        self.assertTrue('version' in info)
 
     def testCreateDb(self):
         res = self.Server.create_db('couchdbkit_test')
-        self.assert_(isinstance(res, Database) == True)
+        self.assertTrue(isinstance(res, Database) == True)
         all_dbs = self.Server.all_dbs()
-        self.assert_('couchdbkit_test' in all_dbs)
+        self.assertTrue('couchdbkit_test' in all_dbs)
         del self.Server['couchdbkit_test']
         res = self.Server.create_db("couchdbkit/test")
-        self.assert_('couchdbkit/test' in self.Server.all_dbs())
+        self.assertTrue('couchdbkit/test' in self.Server.all_dbs())
         del self.Server['couchdbkit/test']
 
     def testGetOrCreateDb(self):
         # create the database
         gocdb = self.Server.get_or_create_db("get_or_create_db")
-        self.assert_(gocdb.dbname == "get_or_create_db")
-        self.assert_("get_or_create_db" in self.Server)
+        self.assertTrue(gocdb.dbname == "get_or_create_db")
+        self.assertTrue("get_or_create_db" in self.Server)
         self.Server.delete_db("get_or_create_db")
         # get the database (already created)
         self.assertFalse("get_or_create_db" in self.Server)
         db = self.Server.create_db("get_or_create_db")
-        self.assert_("get_or_create_db" in self.Server)
+        self.assertTrue("get_or_create_db" in self.Server)
         gocdb = self.Server.get_or_create_db("get_or_create_db")
-        self.assert_(db.dbname == gocdb.dbname)
+        self.assertTrue(db.dbname == gocdb.dbname)
         self.Server.delete_db("get_or_create_db")
 
 
@@ -67,23 +67,23 @@ class ClientServerTestCase(unittest.TestCase):
 
     def testServerLen(self):
         res = self.Server.create_db('couchdbkit_test')
-        self.assert_(len(self.Server) >= 1)
-        self.assert_(bool(self.Server))
+        self.assertTrue(len(self.Server) >= 1)
+        self.assertTrue(bool(self.Server))
         del self.Server['couchdbkit_test']
 
     def testServerContain(self):
         res = self.Server.create_db('couchdbkit_test')
-        self.assert_('couchdbkit_test' in self.Server)
+        self.assertTrue('couchdbkit_test' in self.Server)
         del self.Server['couchdbkit_test']
 
 
     def testGetUUIDS(self):
         uuid = self.Server.next_uuid()
-        self.assert_(isinstance(uuid, basestring) == True)
-        self.assert_(len(self.Server._uuids) == 999)
+        self.assertTrue(isinstance(uuid, str) == True)
+        self.assertTrue(len(self.Server._uuids) == 999)
         uuid2 = self.Server.next_uuid()
-        self.assert_(uuid != uuid2)
-        self.assert_(len(self.Server._uuids) == 998)
+        self.assertTrue(uuid != uuid2)
+        self.assertTrue(len(self.Server._uuids) == 998)
 
 class ClientDatabaseTestCase(unittest.TestCase):
     def setUp(self):
@@ -98,19 +98,19 @@ class ClientDatabaseTestCase(unittest.TestCase):
 
     def testCreateDatabase(self):
         db = self.Server.create_db('couchdbkit_test')
-        self.assert_(isinstance(db, Database) == True)
+        self.assertTrue(isinstance(db, Database) == True)
         info = db.info()
-        self.assert_(info['db_name'] == 'couchdbkit_test')
+        self.assertTrue(info['db_name'] == 'couchdbkit_test')
         del self.Server['couchdbkit_test']
 
     def testDbFromUri(self):
         db = self.Server.create_db('couchdbkit_test')
 
         db1 = Database("http://127.0.0.1:5984/couchdbkit_test")
-        self.assert_(hasattr(db1, "dbname") == True)
-        self.assert_(db1.dbname == "couchdbkit_test")
+        self.assertTrue(hasattr(db1, "dbname") == True)
+        self.assertTrue(db1.dbname == "couchdbkit_test")
         info = db1.info()
-        self.assert_(info['db_name'] == "couchdbkit_test")
+        self.assertTrue(info['db_name'] == "couchdbkit_test")
 
 
     def testCreateEmptyDoc(self):
@@ -118,7 +118,7 @@ class ClientDatabaseTestCase(unittest.TestCase):
         doc = {}
         db.save_doc(doc)
         del self.Server['couchdbkit_test']
-        self.assert_('_id' in doc)
+        self.assertTrue('_id' in doc)
 
 
     def testCreateDoc(self):
@@ -126,20 +126,20 @@ class ClientDatabaseTestCase(unittest.TestCase):
         # create doc without id
         doc = { 'string': 'test', 'number': 4 }
         db.save_doc(doc)
-        self.assert_(db.doc_exist(doc['_id']))
+        self.assertTrue(db.doc_exist(doc['_id']))
         # create doc with id
         doc1 = { '_id': 'test', 'string': 'test', 'number': 4 }
         db.save_doc(doc1)
-        self.assert_(db.doc_exist('test'))
+        self.assertTrue(db.doc_exist('test'))
         doc2 = { 'string': 'test', 'number': 4 }
         db['test2'] = doc2
-        self.assert_(db.doc_exist('test2'))
+        self.assertTrue(db.doc_exist('test2'))
         del self.Server['couchdbkit_test']
 
         db = self.Server.create_db('couchdbkit/test')
         doc1 = { '_id': 'test', 'string': 'test', 'number': 4 }
         db.save_doc(doc1)
-        self.assert_(db.doc_exist('test'))
+        self.assertTrue(db.doc_exist('test'))
         del self.Server['couchdbkit/test']
 
     def testUpdateDoc(self):
@@ -149,35 +149,35 @@ class ClientDatabaseTestCase(unittest.TestCase):
         doc.update({'number': 6})
         db.save_doc(doc)
         doc = db.get(doc['_id'])
-        self.assert_(doc['number'] == 6)
+        self.assertTrue(doc['number'] == 6)
         del self.Server['couchdbkit_test']
 
     def testDocWithSlashes(self):
         db = self.Server.create_db('couchdbkit_test')
         doc = { '_id': "a/b"}
         db.save_doc(doc)
-        self.assert_( "a/b" in db)
+        self.assertTrue( "a/b" in db)
 
         doc = { '_id': "http://a"}
         db.save_doc(doc)
-        self.assert_( "http://a" in db)
+        self.assertTrue( "http://a" in db)
         doc = db.get("http://a")
-        self.assert_(doc is not None)
+        self.assertTrue(doc is not None)
 
         def not_found():
             doc = db.get('http:%2F%2Fa')
         self.assertRaises(ResourceNotFound, not_found)
 
-        self.assert_(doc.get('_id') == "http://a")
+        self.assertTrue(doc.get('_id') == "http://a")
         doc.get('_id')
 
         doc = { '_id': "http://b"}
         db.save_doc(doc)
-        self.assert_( "http://b" in db)
+        self.assertTrue( "http://b" in db)
 
         doc = { '_id': '_design/a' }
         db.save_doc(doc)
-        self.assert_( "_design/a" in db)
+        self.assertTrue( "_design/a" in db)
         del self.Server['couchdbkit_test']
 
     def testGetRev(self):
@@ -185,7 +185,7 @@ class ClientDatabaseTestCase(unittest.TestCase):
         doc = {}
         db.save_doc(doc)
         rev = db.get_rev(doc['_id'])
-        self.assert_(rev == doc['_rev'])
+        self.assertTrue(rev == doc['_rev'])
 
     def testForceUpdate(self):
         db = self.Server.create_db('couchdbkit_test')
@@ -201,7 +201,7 @@ class ClientDatabaseTestCase(unittest.TestCase):
         except ResourceConflict:
             is_conflict = True
 
-        self.assert_(is_conflict == False)
+        self.assertTrue(is_conflict == False)
 
 
     def testMultipleDocWithSlashes(self):
@@ -210,9 +210,9 @@ class ClientDatabaseTestCase(unittest.TestCase):
         doc1 = { '_id': "http://a"}
         doc3 = { '_id': '_design/a' }
         db.bulk_save([doc, doc1, doc3])
-        self.assert_( "a/b" in db)
-        self.assert_( "http://a" in db)
-        self.assert_( "_design/a" in db)
+        self.assertTrue( "a/b" in db)
+        self.assertTrue( "http://a" in db)
+        self.assertTrue( "_design/a" in db)
 
         def not_found():
             doc = db.get('http:%2F%2Fa')
@@ -224,8 +224,8 @@ class ClientDatabaseTestCase(unittest.TestCase):
         db.save_doc(doc1)
         doc2 = { 'string': 'test', 'number': 4 }
         db['test2'] = doc2
-        self.assert_(db.doc_exist('test'))
-        self.assert_(db.doc_exist('test2'))
+        self.assertTrue(db.doc_exist('test'))
+        self.assertTrue(db.doc_exist('test2'))
         design_doc = {
             '_id': '_design/test',
             'language': 'javascript',
@@ -238,15 +238,15 @@ class ClientDatabaseTestCase(unittest.TestCase):
         }
         db.save_doc(design_doc)
         db.put_attachment(design_doc, 'test', 'test', 'test/plain')
-        self.assert_(len(db) == 3)
+        self.assertTrue(len(db) == 3)
         db.flush()
-        self.assert_(len(db) == 1)
+        self.assertTrue(len(db) == 1)
         self.assertFalse(db.doc_exist('test'))
         self.assertFalse(db.doc_exist('test2'))
-        self.assert_(db.doc_exist('_design/test'))
+        self.assertTrue(db.doc_exist('_design/test'))
         ddoc = db.get("_design/test")
-        self.assert_('all' in ddoc['views'])
-        self.assert_('test' in ddoc['_attachments'])
+        self.assertTrue('all' in ddoc['views'])
+        self.assertTrue('test' in ddoc['_attachments'])
         del self.Server['couchdbkit_test']
 
     def testDbLen(self):
@@ -256,7 +256,7 @@ class ClientDatabaseTestCase(unittest.TestCase):
         doc2 = { 'string': 'test2', 'number': 4 }
         db.save_doc(doc2)
 
-        self.assert_(len(db) == 2)
+        self.assertTrue(len(db) == 2)
         del self.Server['couchdbkit_test']
 
     def testDeleteDoc(self):
@@ -265,12 +265,12 @@ class ClientDatabaseTestCase(unittest.TestCase):
         db.save_doc(doc)
         docid=doc['_id']
         db.delete_doc(docid)
-        self.assert_(db.doc_exist(docid) == False)
+        self.assertTrue(db.doc_exist(docid) == False)
         doc = { 'string': 'test', 'number': 4 }
         db.save_doc(doc)
         docid=doc['_id']
         db.delete_doc(doc)
-        self.assert_(db.doc_exist(docid) == False)
+        self.assertTrue(db.doc_exist(docid) == False)
 
         del self.Server['couchdbkit_test']
 
@@ -299,13 +299,13 @@ class ClientDatabaseTestCase(unittest.TestCase):
         }
         db.save_doc(doc)
         fetch_attachment = db.fetch_attachment(doc, "test.html")
-        self.assert_(attachment == fetch_attachment)
+        self.assertTrue(attachment == fetch_attachment)
         doc1 = db.get("docwithattachment")
-        self.assert_('_attachments' in doc1)
-        self.assert_('test.html' in doc1['_attachments'])
-        self.assert_('stub' in doc1['_attachments']['test.html'])
-        self.assert_(doc1['_attachments']['test.html']['stub'] == True)
-        self.assert_(len(attachment) == doc1['_attachments']['test.html']['length'])
+        self.assertTrue('_attachments' in doc1)
+        self.assertTrue('test.html' in doc1['_attachments'])
+        self.assertTrue('stub' in doc1['_attachments']['test.html'])
+        self.assertTrue(doc1['_attachments']['test.html']['stub'] == True)
+        self.assertTrue(len(attachment) == doc1['_attachments']['test.html']['length'])
         del self.Server['couchdbkit_test']
 
     def testMultipleInlineAttachments(self):
@@ -329,15 +329,15 @@ class ClientDatabaseTestCase(unittest.TestCase):
 
         db.save_doc(doc)
         fetch_attachment = db.fetch_attachment(doc, "test.html")
-        self.assert_(attachment == fetch_attachment)
+        self.assertTrue(attachment == fetch_attachment)
         fetch_attachment = db.fetch_attachment(doc, "test2.html")
-        self.assert_(attachment2 == fetch_attachment)
+        self.assertTrue(attachment2 == fetch_attachment)
 
         doc1 = db.get("docwithattachment")
-        self.assert_('test.html' in doc1['_attachments'])
-        self.assert_('test2.html' in doc1['_attachments'])
-        self.assert_(len(attachment) == doc1['_attachments']['test.html']['length'])
-        self.assert_(len(attachment2) == doc1['_attachments']['test2.html']['length'])
+        self.assertTrue('test.html' in doc1['_attachments'])
+        self.assertTrue('test2.html' in doc1['_attachments'])
+        self.assertTrue(len(attachment) == doc1['_attachments']['test.html']['length'])
+        self.assertTrue(len(attachment2) == doc1['_attachments']['test2.html']['length'])
         del self.Server['couchdbkit_test']
 
     def testInlineAttachmentWithStub(self):
@@ -365,36 +365,36 @@ class ClientDatabaseTestCase(unittest.TestCase):
         db.save_doc(doc1)
 
         fetch_attachment = db.fetch_attachment(doc1, "test2.html")
-        self.assert_(attachment2 == fetch_attachment)
+        self.assertTrue(attachment2 == fetch_attachment)
 
         doc2 = db.get("docwithattachment")
-        self.assert_('test.html' in doc2['_attachments'])
-        self.assert_('test2.html' in doc2['_attachments'])
-        self.assert_(len(attachment) == doc2['_attachments']['test.html']['length'])
-        self.assert_(len(attachment2) == doc2['_attachments']['test2.html']['length'])
+        self.assertTrue('test.html' in doc2['_attachments'])
+        self.assertTrue('test2.html' in doc2['_attachments'])
+        self.assertTrue(len(attachment) == doc2['_attachments']['test.html']['length'])
+        self.assertTrue(len(attachment2) == doc2['_attachments']['test2.html']['length'])
         del self.Server['couchdbkit_test']
 
     def testAttachments(self):
         db = self.Server.create_db('couchdbkit_test')
         doc = { 'string': 'test', 'number': 4 }
         db.save_doc(doc)
-        text_attachment = u"un texte attaché"
+        text_attachment = "un texte attaché"
         old_rev = doc['_rev']
         db.put_attachment(doc, text_attachment, "test", "text/plain")
-        self.assert_(old_rev != doc['_rev'])
+        self.assertTrue(old_rev != doc['_rev'])
         fetch_attachment = db.fetch_attachment(doc, "test")
-        self.assert_(text_attachment == fetch_attachment)
+        self.assertTrue(text_attachment == fetch_attachment)
         del self.Server['couchdbkit_test']
 
     def testFetchAttachmentStream(self):
         db = self.Server.create_db('couchdbkit_test')
         doc = { 'string': 'test', 'number': 4 }
         db.save_doc(doc)
-        text_attachment = u"a text attachment"
+        text_attachment = "a text attachment"
         db.put_attachment(doc, text_attachment, "test", "text/plain")
         stream = db.fetch_attachment(doc, "test", stream=True)
         fetch_attachment = stream.read()
-        self.assert_(text_attachment == fetch_attachment)
+        self.assertTrue(text_attachment == fetch_attachment)
         del self.Server['couchdbkit_test']
 
     def testEmptyAttachment(self):
@@ -423,31 +423,31 @@ class ClientDatabaseTestCase(unittest.TestCase):
         db = self.Server.create_db('couchdbkit_test')
         doc = { '_id': 'test/slashes', 'string': 'test', 'number': 4 }
         db.save_doc(doc)
-        text_attachment = u"un texte attaché"
+        text_attachment = "un texte attaché"
         old_rev = doc['_rev']
         db.put_attachment(doc, text_attachment, "test", "text/plain")
-        self.assert_(old_rev != doc['_rev'])
+        self.assertTrue(old_rev != doc['_rev'])
         fetch_attachment = db.fetch_attachment(doc, "test")
-        self.assert_(text_attachment == fetch_attachment)
+        self.assertTrue(text_attachment == fetch_attachment)
 
         db.put_attachment(doc, text_attachment, "test/test.txt", "text/plain")
-        self.assert_(old_rev != doc['_rev'])
+        self.assertTrue(old_rev != doc['_rev'])
         fetch_attachment = db.fetch_attachment(doc, "test/test.txt")
-        self.assert_(text_attachment == fetch_attachment)
+        self.assertTrue(text_attachment == fetch_attachment)
 
         del self.Server['couchdbkit_test']
 
 
     def testAttachmentUnicode8URI(self):
         db = self.Server.create_db('couchdbkit_test')
-        doc = { '_id': u"éàù/slashes", 'string': 'test', 'number': 4 }
+        doc = { '_id': "éàù/slashes", 'string': 'test', 'number': 4 }
         db.save_doc(doc)
-        text_attachment = u"un texte attaché"
+        text_attachment = "un texte attaché"
         old_rev = doc['_rev']
         db.put_attachment(doc, text_attachment, "test", "text/plain")
-        self.assert_(old_rev != doc['_rev'])
+        self.assertTrue(old_rev != doc['_rev'])
         fetch_attachment = db.fetch_attachment(doc, "test")
-        self.assert_(text_attachment == fetch_attachment)
+        self.assertTrue(text_attachment == fetch_attachment)
         del self.Server['couchdbkit_test']
 
     def testSaveMultipleDocs(self):
@@ -459,17 +459,17 @@ class ClientDatabaseTestCase(unittest.TestCase):
                 { 'string': 'test', 'number': 6 }
         ]
         db.bulk_save(docs)
-        self.assert_(len(db) == 4)
-        self.assert_('_id' in docs[0])
-        self.assert_('_rev' in docs[0])
+        self.assertTrue(len(db) == 4)
+        self.assertTrue('_id' in docs[0])
+        self.assertTrue('_rev' in docs[0])
         doc = db.get(docs[2]['_id'])
-        self.assert_(doc['number'] == 4)
+        self.assertTrue(doc['number'] == 4)
         docs[3]['number'] = 6
         old_rev = docs[3]['_rev']
         db.bulk_save(docs)
-        self.assert_(docs[3]['_rev'] != old_rev)
+        self.assertTrue(docs[3]['_rev'] != old_rev)
         doc = db.get(docs[3]['_id'])
-        self.assert_(doc['number'] == 6)
+        self.assertTrue(doc['number'] == 6)
         docs = [
                 { '_id': 'test', 'string': 'test', 'number': 4 },
                 { 'string': 'test', 'number': 5 },
@@ -478,7 +478,7 @@ class ClientDatabaseTestCase(unittest.TestCase):
         ]
         db.bulk_save(docs)
         doc = db.get('test2')
-        self.assert_(doc['number'] == 42)
+        self.assertTrue(doc['number'] == 42)
         del self.Server['couchdbkit_test']
 
     def testDeleteMultipleDocs(self):
@@ -490,10 +490,10 @@ class ClientDatabaseTestCase(unittest.TestCase):
                 { 'string': 'test', 'number': 6 }
         ]
         db.bulk_save(docs)
-        self.assert_(len(db) == 4)
+        self.assertTrue(len(db) == 4)
         db.bulk_delete(docs)
-        self.assert_(len(db) == 0)
-        self.assert_(db.info()['doc_del_count'] == 4)
+        self.assertTrue(len(db) == 0)
+        self.assertTrue(db.info()['doc_del_count'] == 4)
 
         del self.Server['couchdbkit_test']
 
@@ -506,7 +506,7 @@ class ClientDatabaseTestCase(unittest.TestCase):
                 { 'string': 'test', 'number': 6 }
         ]
         db.bulk_save(docs)
-        self.assert_(len(db) == 4)
+        self.assertTrue(len(db) == 4)
         docs1 = [
                 docs[0],
                 docs[1],
@@ -526,12 +526,12 @@ class ClientDatabaseTestCase(unittest.TestCase):
         all_errors = []
         try:
             db.bulk_save(docs2)
-        except BulkSaveError, e:
+        except BulkSaveError as e:
             all_errors = e.errors
 
-        self.assert_(len(all_errors) == 2)
-        self.assert_(all_errors[0]['error'] == 'conflict')
-        self.assert_(doc23 == docs2[3])
+        self.assertTrue(len(all_errors) == 2)
+        self.assertTrue(all_errors[0]['error'] == 'conflict')
+        self.assertTrue(doc23 == docs2[3])
 
         docs3 = [
             docs2[0],
@@ -544,11 +544,11 @@ class ClientDatabaseTestCase(unittest.TestCase):
         all_errors2 = []
         try:
             db.bulk_save(docs3, all_or_nothing=True)
-        except BulkSaveError, e:
+        except BulkSaveError as e:
             all_errors2 = e.errors
 
-        self.assert_(len(all_errors2) == 0)
-        self.assert_(doc33 != docs3[3])
+        self.assertTrue(len(all_errors2) == 0)
+        self.assertTrue(doc33 != docs3[3])
         del self.Server['couchdbkit_test']
 
 
@@ -558,42 +558,42 @@ class ClientDatabaseTestCase(unittest.TestCase):
         db.save_doc(doc)
 
         db.copy_doc(doc['_id'], "test")
-        self.assert_("test" in db)
+        self.assertTrue("test" in db)
         doc1 = db.get("test")
-        self.assert_('f' in doc1)
-        self.assert_(doc1['f'] == "a")
+        self.assertTrue('f' in doc1)
+        self.assertTrue(doc1['f'] == "a")
 
         db.copy_doc(doc, "test2")
-        self.assert_("test2" in db)
+        self.assertTrue("test2" in db)
 
         doc2 = { "_id": "test3", "f": "c"}
         db.save_doc(doc2)
 
         db.copy_doc(doc, doc2)
-        self.assert_("test3" in db)
+        self.assertTrue("test3" in db)
         doc3 = db.get("test3")
-        self.assert_(doc3['f'] == "a")
+        self.assertTrue(doc3['f'] == "a")
 
         doc4 = { "_id": "test5", "f": "c"}
         db.save_doc(doc4)
         db.copy_doc(doc, "test6")
         doc6 = db.get("test6")
-        self.assert_(doc6['f'] == "a")
+        self.assertTrue(doc6['f'] == "a")
 
         del self.Server['couchdbkit_test']
 
     def testSetSecurity(self):
         db = self.Server.create_db('couchdbkit_test')
         res = db.set_security({"meta": "test"})
-        self.assert_(res['ok'] == True)
+        self.assertTrue(res['ok'] == True)
         del self.Server['couchdbkit_test']
 
     def testGetSecurity(self):
         db = self.Server.create_db('couchdbkit_test')
         db.set_security({"meta": "test"})
         res = db.get_security()
-        self.assert_("meta" in res)
-        self.assert_(res['meta'] == "test")
+        self.assertTrue("meta" in res)
+        self.assertTrue(res['meta'] == "test")
         del self.Server['couchdbkit_test']
 
 class ClientViewTestCase(unittest.TestCase):
@@ -635,9 +635,9 @@ class ClientViewTestCase(unittest.TestCase):
         db.save_doc(design_doc)
 
         doc3 = db.get('_design/test')
-        self.assert_(doc3 is not None)
+        self.assertTrue(doc3 is not None)
         results = db.view('test/all')
-        self.assert_(len(results) == 2)
+        self.assertTrue(len(results) == 2)
         del self.Server['couchdbkit_test']
 
     def test_view_indexing(self):
@@ -651,7 +651,7 @@ class ClientViewTestCase(unittest.TestCase):
         viewres = db.view('test/test')
         assert not viewres.params
         subviewres = viewres(key='a')
-        self.assert_(subviewres.params)
+        self.assertTrue(subviewres.params)
 
     def testAllDocs(self):
         db = self.Server.create_db('couchdbkit_test')
@@ -663,8 +663,8 @@ class ClientViewTestCase(unittest.TestCase):
                     'docType': 'test'}
         db.save_doc(doc2)
 
-        self.assert_(db.view('_all_docs').count() == 2 )
-        self.assert_(db.view('_all_docs').all() == db.all_docs().all())
+        self.assertTrue(db.view('_all_docs').count() == 2 )
+        self.assertTrue(db.view('_all_docs').all() == db.all_docs().all())
 
         del self.Server['couchdbkit_test']
 
@@ -689,7 +689,7 @@ class ClientViewTestCase(unittest.TestCase):
         }
         db.save_doc(design_doc)
         count = db.view('/test/all').count()
-        self.assert_(count == 2)
+        self.assertTrue(count == 2)
         del self.Server['couchdbkit_test']
 
     def testTemporaryView(self):
@@ -708,7 +708,7 @@ class ClientViewTestCase(unittest.TestCase):
         }
 
         results = db.temp_view(design_doc)
-        self.assert_(len(results) == 2)
+        self.assertTrue(len(results) == 2)
         del self.Server['couchdbkit_test']
 
 
@@ -743,9 +743,9 @@ class ClientViewTestCase(unittest.TestCase):
 
         # yo view is callable !
         results = db.view('test/with_test')
-        self.assert_(len(results) == 2)
+        self.assertTrue(len(results) == 2)
         results = db.view('test/with_test2')
-        self.assert_(len(results) == 1)
+        self.assertTrue(len(results) == 1)
         del self.Server['couchdbkit_test']
 
     def testViewWithParams(self):
@@ -795,25 +795,25 @@ class ClientViewTestCase(unittest.TestCase):
         db.save_doc(design_doc)
 
         results = db.view('test/test1')
-        self.assert_(len(results) == 6)
+        self.assertTrue(len(results) == 6)
 
         results = db.view('test/test3', key="test")
-        self.assert_(len(results) == 2)
+        self.assertTrue(len(results) == 2)
 
 
 
         results = db.view('test/test3', key="test2")
-        self.assert_(len(results) == 3)
+        self.assertTrue(len(results) == 3)
 
         results = db.view('test/test2', startkey="200811")
-        self.assert_(len(results) == 5)
+        self.assertTrue(len(results) == 5)
 
         results = db.view('test/test2', startkey="20081107",
                 endkey="20081108")
-        self.assert_(len(results) == 3)
+        self.assertTrue(len(results) == 3)
 
         results = db.view('test/test1', keys=['test', 'machin'] )
-        self.assert_(len(results) == 3)
+        self.assertTrue(len(results) == 3)
 
         del self.Server['couchdbkit_test']
 
@@ -851,12 +851,12 @@ class ClientViewTestCase(unittest.TestCase):
         db.save_doc(design_doc)
         # provide classes as a list
         results = list(db.view('test/all', schema=[A, B]))
-        self.assert_(results[0].__class__ == A)
-        self.assert_(results[1].__class__ == B)
+        self.assertTrue(results[0].__class__ == A)
+        self.assertTrue(results[1].__class__ == B)
         # provide classes as a dict
         results = list(db.view('test/all', schema={'A': A, 'B': B}))
-        self.assert_(results[0].__class__ == A)
-        self.assert_(results[1].__class__ == B)
+        self.assertTrue(results[0].__class__ == A)
+        self.assertTrue(results[1].__class__ == B)
         self.Server.delete_db('couchdbkit_test')
 
 

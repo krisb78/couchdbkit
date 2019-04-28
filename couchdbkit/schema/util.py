@@ -8,7 +8,7 @@ def schema_map(schema, dynamic_properties):
         schema = dict((s._doc_type, s) for s in schema)
 
     if dynamic_properties is not None:
-        for name, cls in schema.items():
+        for name, cls in list(schema.items()):
             if cls._allow_dynamic_properties != dynamic_properties:
                 schema[name] = type(cls.__name__, (cls,), {
                     '_allow_dynamic_properties': dynamic_properties,
@@ -23,7 +23,7 @@ def doctype_attr_of(classes):
 
 
 def get_multi_wrapper(classes):
-    doctype_attr = doctype_attr_of(classes.values())
+    doctype_attr = doctype_attr_of(list(classes.values()))
 
     def wrap(doc):
         doc_type = doc.get(doctype_attr)
